@@ -13,6 +13,7 @@ const Employee = () => {
   const [modalVisible, setModalVisible] = useState(false)
   const [modalData, setModalData] = useState({})
   const [isAddingNew, setIsAddingNew] = useState(false)
+  const [validationErrors, setValidationErrors] = useState({})
 
   useEffect(() => {
     fetchData()
@@ -62,6 +63,10 @@ const Employee = () => {
     }
   }
 
+  const handleCancel = () => {
+    setModalVisible(false)
+    setValidationErrors({})
+  }
   const handleAddNew = () => {
     setModalData({})
     setIsAddingNew(true)
@@ -70,24 +75,48 @@ const Employee = () => {
 
   const handleSave = async () => {
     try {
-      if (isAddingNew) {
-        await axios.post('http://localhost:9091/employees/save', modalData, {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem('token')}`,
-          },
-        })
-      } else {
-        await axios.put(`http://localhost:9091/employees/update/${modalData.id}`, modalData, {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem('token')}`,
-          },
-        })
+      if (validateForm()) {
+        if (isAddingNew) {
+          await axios.post('http://localhost:9091/employees/save', modalData, {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem('token')}`,
+            },
+          })
+        } else {
+          await axios.put(`http://localhost:9091/employees/update/${modalData.id}`, modalData, {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem('token')}`,
+            },
+          })
+        }
+        setModalVisible(false)
+        fetchData()
+        window.location.reload()
       }
-      setModalVisible(false)
-      fetchData()
     } catch (error) {
       console.error('Error saving employee data:', error)
     }
+  }
+
+  const validateForm = () => {
+    const errors = {}
+    if (!modalData.firstName) {
+      errors.firstName = 'First Name is required'
+    }
+    if (!modalData.lastName) {
+      errors.lastName = 'Last Name is required'
+    }
+    if (!modalData.age || isNaN(modalData.age)) {
+      errors.age = 'Age is required and must be a number'
+    }
+    if (!modalData.educationDetails) {
+      errors.educationDetails = 'Education Details is required'
+    }
+    if (!modalData.role) {
+      errors.role = 'Role is required'
+    }
+    setValidationErrors(errors)
+    return Object.keys(errors).length === 0
   }
 
   const columns = [
@@ -164,7 +193,7 @@ const Employee = () => {
         title={isAddingNew ? 'Add Employee' : 'Update Employee'}
         visible={modalVisible}
         onOk={handleSave}
-        onCancel={() => setModalVisible(false)}
+        onCancel={handleCancel}
       >
         <div>
           <CFormLabel htmlFor="firstName">First Name:</CFormLabel>
@@ -173,6 +202,9 @@ const Employee = () => {
             value={modalData.firstName}
             onChange={(e) => setModalData({ ...modalData, firstName: e.target.value })}
           />
+          {validationErrors.firstName && (
+            <p style={{ color: 'red' }}>{validationErrors.firstName}</p>
+          )}
         </div>
         <div>
           <CFormLabel htmlFor="lastName">Last Name:</CFormLabel>
@@ -181,6 +213,7 @@ const Employee = () => {
             value={modalData.lastName}
             onChange={(e) => setModalData({ ...modalData, lastName: e.target.value })}
           />
+          {validationErrors.lastName && <p style={{ color: 'red' }}>{validationErrors.lastName}</p>}
         </div>
         <div>
           <CFormLabel htmlFor="age">Age:</CFormLabel>
@@ -189,6 +222,7 @@ const Employee = () => {
             value={modalData.age}
             onChange={(e) => setModalData({ ...modalData, age: e.target.value })}
           />
+          {validationErrors.age && <p style={{ color: 'red' }}>{validationErrors.age}</p>}
         </div>
         <div>
           <CFormLabel htmlFor="educationDetails">Education Details:</CFormLabel>
@@ -197,6 +231,9 @@ const Employee = () => {
             value={modalData.educationDetails}
             onChange={(e) => setModalData({ ...modalData, educationDetails: e.target.value })}
           />
+          {validationErrors.educationDetails && (
+            <p style={{ color: 'red' }}>{validationErrors.educationDetails}</p>
+          )}
         </div>
         <div>
           <CFormLabel htmlFor="role">Role:</CFormLabel>
@@ -205,10 +242,10 @@ const Employee = () => {
             value={modalData.role}
             onChange={(e) => setModalData({ ...modalData, role: e.target.value })}
           />
+          {validationErrors.role && <p style={{ color: 'red' }}>{validationErrors.role}</p>}
         </div>
       </Modal>
     </div>
   )
 }
-
 export default Employee

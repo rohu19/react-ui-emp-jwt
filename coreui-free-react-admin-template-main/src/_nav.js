@@ -28,16 +28,16 @@ const _nav = [
       text: 'NEW',
     },
   },
-  {
-    component: CNavItem,
-    name: 'Profile',
-    to: '/profile',
-    icon: <CIcon icon={cilUser} customClassName="nav-icon" />,
-    badge: {
-      color: 'secondary',
-      text: '',
-    },
-  },
+  // {
+  //   component: CNavItem,
+  //   name: 'Profile',
+  //   to: '/profile',
+  //   icon: <CIcon icon={cilUser} customClassName="nav-icon" />,
+  //   badge: {
+  //     color: 'secondary',
+  //     text: '',
+  //   },
+  // },
   {
     component: CNavTitle,
     name: 'Theme',

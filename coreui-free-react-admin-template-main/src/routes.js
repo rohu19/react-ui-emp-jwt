@@ -3,7 +3,7 @@ import Employee from './views/employee/Employee'
 
 const Dashboard = React.lazy(() => import('./views/dashboard/Dashboard'))
 
-const Profile = React.lazy(() => import('./views/dashboard/Profile'))
+// const Profile = React.lazy(() => import('./views/dashboard/Profile'))
 const Colors = React.lazy(() => import('./views/theme/colors/Colors'))
 const Typography = React.lazy(() => import('./views/theme/typography/Typography'))
 
@@ -55,7 +55,7 @@ const Widgets = React.lazy(() => import('./views/widgets/Widgets'))
 const routes = [
   { path: '/', exact: true, name: 'Home' },
   { path: '/dashboard', name: 'Dashboard', element: Dashboard },
-  { path: '/profile', name: 'Profile', element: Profile },
+  // { path: '/profile', name: 'Profile', element: Profile },
   { path: '/theme', name: 'Theme', element: Colors, exact: true },
   { path: '/theme/colors', name: 'Colors', element: Colors },
   { path: '/theme/typography', name: 'Typography', element: Typography },
