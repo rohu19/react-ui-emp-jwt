@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { Button, Modal, Table } from 'antd'
+import { Button, Modal, Table, Input } from 'antd'
 import axios from 'axios'
 import { FaUserEdit } from 'react-icons/fa'
 import { RiDeleteBin6Line } from 'react-icons/ri'
@@ -14,6 +14,13 @@ const Employee = () => {
   const [modalData, setModalData] = useState({})
   const [isAddingNew, setIsAddingNew] = useState(false)
   const [validationErrors, setValidationErrors] = useState({})
+  const [searchCriteria, setSearchCriteria] = useState({
+    firstName: '',
+    lastName: '',
+    age: '',
+    educationDetails: '',
+    role: '',
+  })
 
   useEffect(() => {
     fetchData()
@@ -21,12 +28,12 @@ const Employee = () => {
 
   const fetchData = async () => {
     try {
-      const params = new URLSearchParams()
-      params.append('page', currentPage)
-      params.append('size', pageSize)
-
-      const response = await axios.get(
-        `http://localhost:9091/employees/page?${params.toString()}`,
+      const response = await axios.post(
+        `http://localhost:9091/employees/search`,
+        {
+          page: currentPage,
+          size: pageSize,
+        },
         {
           headers: {
             Authorization: `Bearer ${localStorage.getItem('token')}`,
@@ -37,6 +44,35 @@ const Employee = () => {
       setTotalPages(response.data.totalPages)
     } catch (error) {
       console.error('Error fetching data:', error)
+    }
+  }
+
+  const handleSearch = async () => {
+    try {
+      let queryParams = { ...searchCriteria }
+
+      Object.keys(queryParams).forEach((key) => {
+        if (queryParams[key] === '') {
+          delete queryParams[key]
+        }
+      })
+
+      const response = await axios.post(
+        `http://localhost:9091/employees/search`,
+        {
+          ...queryParams,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem('token')}`,
+          },
+        },
+      )
+
+      setData(response.data.content)
+      setTotalPages(1)
+    } catch (error) {
+      console.error('Error searching employees:', error)
     }
   }
 
@@ -67,6 +103,7 @@ const Employee = () => {
     setModalVisible(false)
     setValidationErrors({})
   }
+
   const handleAddNew = () => {
     setModalData({})
     setIsAddingNew(true)
@@ -168,6 +205,40 @@ const Employee = () => {
 
   return (
     <div>
+      <div style={{ marginBottom: '10px' }}>
+        <Input
+          placeholder="Search by First Name"
+          value={searchCriteria.firstName}
+          onChange={(e) => setSearchCriteria({ ...searchCriteria, firstName: e.target.value })}
+        />
+        <Input
+          placeholder="Search by Last Name"
+          value={searchCriteria.lastName}
+          onChange={(e) => setSearchCriteria({ ...searchCriteria, lastName: e.target.value })}
+        />
+        <Input
+          placeholder="Search by Age"
+          value={searchCriteria.age}
+          onChange={(e) =>
+            setSearchCriteria({ ...searchCriteria, age: parseInt(e.target.value, 10) || '' })
+          }
+        />
+        <Input
+          placeholder="Search by Role Name"
+          value={searchCriteria.role}
+          onChange={(e) => setSearchCriteria({ ...searchCriteria, role: e.target.value })}
+        />
+        <Input
+          placeholder="Search by Education Details"
+          value={searchCriteria.educationDetails}
+          onChange={(e) =>
+            setSearchCriteria({ ...searchCriteria, educationDetails: e.target.value })
+          }
+        />
+        <Button type="primary" onClick={handleSearch}>
+          Search
+        </Button>
+      </div>
       <Button type="primary" onClick={handleAddNew} style={{ marginBottom: '10px' }}>
         Add Employee
       </Button>
@@ -191,7 +262,7 @@ const Employee = () => {
       </div>
       <Modal
         title={isAddingNew ? 'Add Employee' : 'Update Employee'}
-        visible={modalVisible}
+        open={modalVisible}
         onOk={handleSave}
         onCancel={handleCancel}
       >
@@ -248,4 +319,5 @@ const Employee = () => {
     </div>
   )
 }
+
 export default Employee
